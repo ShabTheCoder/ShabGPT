@@ -6,5 +6,12 @@
   "compatibility_date": "2026-11-02",
   "ai": {
     "binding": "AI"
-  }
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "shabgpt-db",
+      "database_id": "64989a50-6853-4467-8948-0089ebfa7cd2"
+    }
+  ]
 }
