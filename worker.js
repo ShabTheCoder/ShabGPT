@@ -46,31 +46,23 @@ export default {
       }
 
       const result = await env.AI.run(MODEL, {
-  messages: body.messages,
-  max_tokens: Math.min(
-    Number(body.max_tokens) || 512,
-    1024
-  ),
-  chat_template_kwargs: {
-    enable_thinking: false
-  }
-});
+        messages: body.messages,
+        max_tokens: Math.min(
+          Number(body.max_tokens) || 512,
+          1024
+        ),
+        chat_template_kwargs: {
+          enable_thinking: false
+        }
+      });
 
-return reply({
-  debug: result
-});
       return reply({
-        id: crypto.randomUUID(),
+        id: result.id || crypto.randomUUID(),
         object: "chat.completion",
-        model: MODEL,
-        choices: [{
-          index: 0,
-          message: {
-            role: "assistant",
-            content: result.response ?? ""
-          },
-          finish_reason: "stop"
-        }]
+        created: result.created || Math.floor(Date.now() / 1000),
+        model: result.model || MODEL,
+        choices: result.choices || [],
+        usage: result.usage || {}
       });
 
     } catch (error) {
@@ -81,4 +73,3 @@ return reply({
     }
   }
 };
-                           
