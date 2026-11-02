@@ -46,13 +46,19 @@ export default {
       }
 
       const result = await env.AI.run(MODEL, {
-        messages: body.messages,
-        max_tokens: Math.min(
-          Number(body.max_tokens) || 512,
-          1024
-        )
-      });
+  messages: body.messages,
+  max_tokens: Math.min(
+    Number(body.max_tokens) || 512,
+    1024
+  ),
+  chat_template_kwargs: {
+    enable_thinking: false
+  }
+});
 
+return reply({
+  debug: result
+});
       return reply({
         id: crypto.randomUUID(),
         object: "chat.completion",
