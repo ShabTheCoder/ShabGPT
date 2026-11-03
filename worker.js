@@ -207,9 +207,12 @@ export default {
           token
         }, 201);
 
-      } catch {
-        return reply({ error: "Registration failed." }, 500);
-      }
+     } catch (error) {
+         return reply({
+         error: "Registration failed.",
+         details: error.message
+      }, 500);
+    }
     }
 
     if (request.method === "POST" && path === "/auth/login") {
