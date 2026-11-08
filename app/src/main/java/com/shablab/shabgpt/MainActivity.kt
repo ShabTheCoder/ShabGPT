@@ -247,7 +247,7 @@ private fun ShabGPTApp(context: Context) {
                                         .getJSONObject("message").getString("content")
                                     conversationId = result.optString("conversation_id", conversationId)
                                     persistSession()
-                                    messages.add(ChatMessage(result.optString("assistant_message_id").ifBlank { null }, "assistant", answer))
+                                    messages.add(ChatMessage(result.optString("assistant_message_id").takeIf { it.isNotBlank() }, "assistant", answer))
                                 } catch (e: Exception) {
                                     error = e.message ?: "Message failed. Check your connection and try again."
                                 }
