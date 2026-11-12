@@ -394,35 +394,25 @@ private fun ChatScreen(accent: AccentTheme, username: String, messages: List<Cha
     }
 
     Column(Modifier.fillMaxSize().background(Ink)) {
-        // Website-inspired compact header: restrained branding, subtle divider, clear actions.
         Row(
-            Modifier.fillMaxWidth().background(Color(0xFF0C0B10)).padding(horizontal = 13.dp, vertical = 8.dp),
+            Modifier.fillMaxWidth().background(Color(0xFF101014)).padding(horizontal = 10.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = onHistory, modifier = Modifier.size(44.dp)) {
-                Icon(Icons.Default.Menu, "Open conversation history", tint = Muted)
+            IconButton(onClick = onHistory, modifier = Modifier.size(42.dp)) {
+                Icon(Icons.Default.Menu, "Conversation history", tint = Muted, modifier = Modifier.size(22.dp))
             }
-            BrandMark(32, accent)
-            Spacer(Modifier.width(10.dp))
-            Column(Modifier.weight(1f), verticalArrangement = Arrangement.Center) {
-                Text("ShabGPT", color = MainText, fontWeight = FontWeight.Bold, fontSize = 16.sp, letterSpacing = (-0.35).sp)
-                Text("PERSONAL AI ASSISTANT", color = Muted, fontSize = 8.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.05.sp)
-            }
-            Surface(color = Panel2, shape = RoundedCornerShape(50), border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.07f))) {
-                Row(Modifier.padding(horizontal = 10.dp, vertical = 7.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Box(Modifier.size(6.dp).background(accent.primary, CircleShape))
-                    Spacer(Modifier.width(6.dp))
-                    Text("Gemma 4", color = Muted, fontSize = 10.sp)
-                }
+            Column(Modifier.weight(1f).padding(start = 5.dp)) {
+                Text("ShabGPT", color = MainText, fontSize = 17.sp, fontWeight = FontWeight.SemiBold, letterSpacing = (-0.3).sp)
+                Text("Beyond the Existing", color = Muted, fontSize = 10.sp)
             }
             IconButton(onClick = onNewChat, modifier = Modifier.size(42.dp)) {
                 Icon(Icons.Default.Add, "New chat", tint = MainText, modifier = Modifier.size(23.dp))
             }
             IconButton(onClick = onSettings, modifier = Modifier.size(42.dp)) {
-                Icon(Icons.Default.Settings, "Settings", tint = Muted, modifier = Modifier.size(21.dp))
+                Icon(Icons.Default.Settings, "Settings", tint = Muted, modifier = Modifier.size(20.dp))
             }
         }
-        Box(Modifier.fillMaxWidth().height(1.dp).background(Color.White.copy(alpha = 0.055f)))
+        Box(Modifier.fillMaxWidth().height(1.dp).background(Color.White.copy(alpha = 0.07f)))
 
         if (messages.isEmpty()) {
             Column(
@@ -430,44 +420,33 @@ private fun ChatScreen(accent: AccentTheme, username: String, messages: List<Cha
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                BrandMark(62, accent)
-                Spacer(Modifier.height(23.dp))
-                Text(
-                    "Beyond the Existing.",
-                    color = MainText, fontSize = 30.sp, lineHeight = 36.sp,
-                    fontWeight = FontWeight.ExtraBold, letterSpacing = (-1.1).sp,
-                    textAlign = TextAlign.Center
-                )
-                Spacer(Modifier.height(9.dp))
-                Text(
-                    "A space to think, explore ideas, and build something new.",
-                    color = Muted, fontSize = 13.sp, lineHeight = 20.sp,
-                    textAlign = TextAlign.Center, modifier = Modifier.widthIn(max = 310.dp)
-                )
-                Spacer(Modifier.height(27.dp))
+                Text("What would you like to work on?", color = MainText, fontSize = 27.sp,
+                    lineHeight = 34.sp, fontWeight = FontWeight.SemiBold, letterSpacing = (-0.8).sp,
+                    textAlign = TextAlign.Center)
+                Spacer(Modifier.height(10.dp))
+                Text("Ask a question, explore an idea, or continue building something.",
+                    color = Muted, fontSize = 13.sp, lineHeight = 20.sp, textAlign = TextAlign.Center,
+                    modifier = Modifier.widthIn(max = 320.dp))
+                Spacer(Modifier.height(28.dp))
                 val suggestions = listOf(
-                    "Explain a complex idea simply",
-                    "Help me plan a project",
-                    "Explore something unexpected",
-                    "Write or improve something"
+                    "Explain a complex topic",
+                    "Plan a project",
+                    "Explore a new idea",
+                    "Improve a piece of writing"
                 )
                 suggestions.chunked(2).forEach { pair ->
-                    Row(Modifier.fillMaxWidth().widthIn(max = 560.dp), horizontalArrangement = Arrangement.spacedBy(9.dp)) {
+                    Row(Modifier.fillMaxWidth().widthIn(max = 560.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         pair.forEach { suggestion ->
                             Surface(
                                 Modifier.weight(1f).padding(vertical = 4.dp).clickable { onPrompt(suggestion) },
-                                color = Color(0xFF15131B),
-                                shape = RoundedCornerShape(15.dp),
+                                color = Color(0xFF15151B), shape = RoundedCornerShape(14.dp),
                                 border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.075f))
                             ) {
-                                Row(Modifier.padding(horizontal = 13.dp, vertical = 15.dp), verticalAlignment = Alignment.CenterVertically) {
-                                    Text(suggestion, color = MainText, fontWeight = FontWeight.Medium, fontSize = 11.sp,
-                                        lineHeight = 16.sp, modifier = Modifier.weight(1f))
-                                    Text("↗", color = accent.primary, fontSize = 16.sp)
-                                }
+                                Text(suggestion, color = MainText, fontWeight = FontWeight.Medium,
+                                    fontSize = 12.sp, lineHeight = 17.sp,
+                                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 16.dp))
                             }
                         }
-                        if (pair.size == 1) Spacer(Modifier.weight(1f))
                     }
                 }
             }
@@ -475,66 +454,57 @@ private fun ChatScreen(accent: AccentTheme, username: String, messages: List<Cha
             LazyColumn(
                 state = listState,
                 modifier = Modifier.weight(1f).fillMaxWidth(),
-                contentPadding = PaddingValues(start = 15.dp, end = 15.dp, top = 17.dp, bottom = 22.dp),
-                verticalArrangement = Arrangement.spacedBy(19.dp)
+                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 20.dp, bottom = 24.dp),
+                verticalArrangement = Arrangement.spacedBy(22.dp)
             ) {
                 items(messages) { msg ->
                     val isUser = msg.role == "user"
-                    Row(
-                        Modifier.fillMaxWidth(),
-                        horizontalArrangement = if (isUser) Arrangement.End else Arrangement.Start,
-                        verticalAlignment = Alignment.Top
-                    ) {
-                        if (!isUser) {
-                            BrandMark(29, accent)
-                            Spacer(Modifier.width(10.dp))
-                        }
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = if (isUser) Arrangement.End else Arrangement.Start) {
                         Column(
-                            Modifier.widthIn(max = 620.dp).fillMaxWidth(if (isUser) 0.88f else 0.91f),
+                            Modifier.widthIn(max = 720.dp).fillMaxWidth(if (isUser) 0.88f else 0.96f),
                             horizontalAlignment = if (isUser) Alignment.End else Alignment.Start
                         ) {
-                            Text(
-                                if (isUser) "You" else "ShabGPT",
-                                color = if (isUser) accent.primary else accent.secondary,
-                                fontSize = 10.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 0.35.sp,
-                                modifier = Modifier.padding(horizontal = if (isUser) 5.dp else 2.dp, vertical = 3.dp)
-                            )
-                            Surface(
-                                color = if (isUser) Color(0xFF211D2A) else Color.Transparent,
-                                border = if (isUser) androidx.compose.foundation.BorderStroke(1.dp, accent.primary.copy(alpha = 0.17f)) else null,
-                                shape = if (isUser) RoundedCornerShape(topStart = 18.dp, topEnd = 6.dp, bottomEnd = 18.dp, bottomStart = 18.dp) else RoundedCornerShape(0.dp),
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Column(Modifier.padding(horizontal = if (isUser) 14.dp else 2.dp, vertical = if (isUser) 12.dp else 4.dp)) {
-                                    if (msg.images.isNotEmpty()) {
-                                        Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                            msg.images.forEach { data ->
-                                                val bitmap = remember(data) { decodeDataUrl(data) }
-                                                if (bitmap != null) Image(
-                                                    bitmap.asImageBitmap(), "Attached image",
-                                                    Modifier.size(142.dp).background(Panel2, RoundedCornerShape(12.dp)),
-                                                    contentScale = ContentScale.Crop
-                                                )
+                            if (isUser) {
+                                Surface(color = Color(0xFF24212B), shape = RoundedCornerShape(20.dp),
+                                    border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.07f))) {
+                                    Column(Modifier.padding(horizontal = 15.dp, vertical = 12.dp)) {
+                                        if (msg.images.isNotEmpty()) {
+                                            Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                                msg.images.forEach { data ->
+                                                    val bitmap = remember(data) { decodeDataUrl(data) }
+                                                    if (bitmap != null) Image(bitmap.asImageBitmap(), "Attached image",
+                                                        Modifier.size(142.dp).background(Panel2, RoundedCornerShape(12.dp)), contentScale = ContentScale.Crop)
+                                                }
                                             }
+                                            if (msg.content.isNotBlank()) Spacer(Modifier.height(9.dp))
                                         }
-                                        if (msg.content.isNotBlank()) Spacer(Modifier.height(9.dp))
-                                    }
-                                    if (msg.content.isNotBlank()) {
-                                        if (isUser) {
-                                            SelectionContainer { Text(msg.content, color = MainText, fontSize = 14.sp, lineHeight = 22.sp) }
-                                        } else {
-                                            MarkdownText(msg.content, accent)
+                                        if (msg.content.isNotBlank()) SelectionContainer {
+                                            Text(msg.content, color = MainText, fontSize = 14.sp, lineHeight = 22.sp)
                                         }
                                     }
                                 }
-                            }
-                            if (!isUser) {
-                                Row(horizontalArrangement = Arrangement.spacedBy(3.dp), modifier = Modifier.padding(start = 0.dp, top = 3.dp)) {
-                                    TextButton(onClick = { onCopy(msg.content) }, contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)) {
+                            } else {
+                                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 7.dp)) {
+                                    Box(Modifier.size(7.dp).background(accent.primary, CircleShape))
+                                    Spacer(Modifier.width(8.dp))
+                                    Text("ShabGPT", color = MainText, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                                }
+                                if (msg.images.isNotEmpty()) {
+                                    Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                        msg.images.forEach { data ->
+                                            val bitmap = remember(data) { decodeDataUrl(data) }
+                                            if (bitmap != null) Image(bitmap.asImageBitmap(), "Attached image",
+                                                Modifier.size(142.dp).background(Panel2, RoundedCornerShape(12.dp)), contentScale = ContentScale.Crop)
+                                        }
+                                    }
+                                }
+                                if (msg.content.isNotBlank()) MarkdownText(msg.content, accent)
+                                Row(horizontalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.padding(top = 5.dp)) {
+                                    TextButton(onClick = { onCopy(msg.content) }, contentPadding = PaddingValues(horizontal = 7.dp, vertical = 2.dp)) {
                                         Icon(Icons.Default.ContentCopy, null, Modifier.size(13.dp), tint = Muted)
                                         Spacer(Modifier.width(5.dp)); Text("Copy", fontSize = 11.sp, color = Muted)
                                     }
-                                    TextButton(onClick = { onShare(msg.content) }, contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)) {
+                                    TextButton(onClick = { onShare(msg.content) }, contentPadding = PaddingValues(horizontal = 7.dp, vertical = 2.dp)) {
                                         Icon(Icons.Default.Share, null, Modifier.size(13.dp), tint = Muted)
                                         Spacer(Modifier.width(5.dp)); Text("Share", fontSize = 11.sp, color = Muted)
                                     }
@@ -545,9 +515,9 @@ private fun ChatScreen(accent: AccentTheme, username: String, messages: List<Cha
                 }
                 if (busy) {
                     item {
-                        Row(Modifier.padding(start = 39.dp, top = 2.dp), verticalAlignment = Alignment.CenterVertically) {
-                            CircularProgressIndicator(Modifier.size(15.dp), color = accent.primary, strokeWidth = 2.dp)
-                            Spacer(Modifier.width(9.dp))
+                        Row(Modifier.padding(start = 2.dp, top = 2.dp), verticalAlignment = Alignment.CenterVertically) {
+                            CircularProgressIndicator(Modifier.size(16.dp), color = accent.primary, strokeWidth = 2.dp)
+                            Spacer(Modifier.width(10.dp))
                             Text("ShabGPT is thinking…", color = Muted, fontSize = 12.sp)
                         }
                     }
@@ -556,7 +526,7 @@ private fun ChatScreen(accent: AccentTheme, username: String, messages: List<Cha
         }
 
         if (error.isNotBlank()) {
-            Row(Modifier.fillMaxWidth().padding(horizontal = 15.dp, vertical = 5.dp), verticalAlignment = Alignment.CenterVertically) {
+            Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 5.dp), verticalAlignment = Alignment.CenterVertically) {
                 Text(error, color = Danger, fontSize = 12.sp, modifier = Modifier.weight(1f))
                 TextButton(onClick = onRetry) { Icon(Icons.Default.Refresh, null); Text("Retry") }
             }
@@ -564,11 +534,10 @@ private fun ChatScreen(accent: AccentTheme, username: String, messages: List<Cha
         if (info.isNotBlank()) {
             Text(info, color = accent.secondary, fontSize = 10.sp, modifier = Modifier.padding(start = 17.dp, bottom = 4.dp))
         }
-
         if (pendingImages.isNotEmpty()) {
             Row(
-                Modifier.fillMaxWidth().background(Color(0xFF0D0C11)).horizontalScroll(rememberScrollState())
-                    .padding(horizontal = 14.dp, vertical = 9.dp),
+                Modifier.fillMaxWidth().background(Color(0xFF0D0D11)).horizontalScroll(rememberScrollState())
+                    .padding(horizontal = 16.dp, vertical = 9.dp),
                 horizontalArrangement = Arrangement.spacedBy(9.dp)
             ) {
                 pendingImages.forEachIndexed { index, data ->
@@ -584,20 +553,21 @@ private fun ChatScreen(accent: AccentTheme, username: String, messages: List<Cha
                 }
             }
         }
-        Column(Modifier.fillMaxWidth().background(Color(0xFF0A090D)).padding(horizontal = 12.dp, vertical = 9.dp)) {
+        Column(Modifier.fillMaxWidth().background(Color(0xFF0D0D11)).padding(horizontal = 13.dp, vertical = 10.dp)) {
             Surface(
-                color = Color(0xFF19171F), shape = RoundedCornerShape(22.dp),
-                border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.105f)),
+                color = Color(0xFF19191F), shape = RoundedCornerShape(24.dp),
+                border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.10f)),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Row(verticalAlignment = Alignment.Bottom) {
-                    IconButton(onClick = onAttach, enabled = !busy && !imageBusy && pendingImages.size < 3, modifier = Modifier.size(48.dp)) {
+                    IconButton(onClick = onAttach, enabled = !busy && !imageBusy && pendingImages.size < 3,
+                        modifier = Modifier.size(48.dp)) {
                         if (imageBusy) CircularProgressIndicator(Modifier.size(18.dp), color = accent.primary, strokeWidth = 2.dp)
-                        else Icon(Icons.Default.AttachFile, "Attach up to three images", tint = Muted, modifier = Modifier.size(22.dp))
+                        else Icon(Icons.Default.AttachFile, "Attach images", tint = Muted, modifier = Modifier.size(21.dp))
                     }
                     TextField(
                         value = prompt, onValueChange = onPrompt, modifier = Modifier.weight(1f),
-                        placeholder = { Text("Message ShabGPT…", color = Muted, fontSize = 14.sp) },
+                        placeholder = { Text("Message ShabGPT", color = Muted, fontSize = 14.sp) },
                         maxLines = 5, shape = RoundedCornerShape(20.dp),
                         colors = TextFieldDefaults.colors(
                             focusedContainerColor = Color.Transparent, unfocusedContainerColor = Color.Transparent,
@@ -607,20 +577,19 @@ private fun ChatScreen(accent: AccentTheme, username: String, messages: List<Cha
                         ),
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Default)
                     )
-                    Spacer(Modifier.width(5.dp))
                     FilledIconButton(
                         onClick = onSend, enabled = !busy && (prompt.isNotBlank() || pendingImages.isNotEmpty()),
-                        modifier = Modifier.padding(end = 7.dp, bottom = 7.dp).size(42.dp), shape = RoundedCornerShape(14.dp),
+                        modifier = Modifier.padding(end = 7.dp, bottom = 7.dp).size(42.dp), shape = CircleShape,
                         colors = IconButtonDefaults.filledIconButtonColors(
                             containerColor = accent.primary, contentColor = Ink,
                             disabledContainerColor = Color(0xFF34313A), disabledContentColor = Color(0xFF77717F)
                         )
-                    ) { Icon(Icons.Default.Send, "Send message", modifier = Modifier.size(19.dp)) }
+                    ) { Icon(Icons.Default.Send, "Send message", modifier = Modifier.size(18.dp)) }
                 }
             }
             Spacer(Modifier.height(7.dp))
-            Text("ShabGPT can make mistakes. Check important information.", color = Color(0xFF77717F),
-                fontSize = 9.sp, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
+            Text("ShabGPT may make mistakes. Verify important information.",
+                color = Color(0xFF77717F), fontSize = 9.sp, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
         }
     }
 }
