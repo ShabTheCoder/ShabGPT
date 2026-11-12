@@ -105,6 +105,7 @@ private fun ShabGPTApp(context: Context) {
     var username by remember { mutableStateOf(prefs.getString("username", "").orEmpty()) }
     var conversationId by remember { mutableStateOf(prefs.getString("conversation_id", "").orEmpty()) }
     var selectedTheme by remember { mutableStateOf(prefs.getString("accent_theme", "Purple").orEmpty()) }
+    var selectedTimezone by remember { mutableStateOf(prefs.getString("timezone", java.util.TimeZone.getDefault().id).orEmpty()) }
     val accent = AccentThemes.firstOrNull { it.name == selectedTheme } ?: AccentThemes.first()
     var register by remember { mutableStateOf(false) }
     var usernameInput by remember { mutableStateOf("") }
@@ -123,7 +124,8 @@ private fun ShabGPTApp(context: Context) {
 
     fun persistSession() {
         prefs.edit().putString("token", token).putString("username", username)
-            .putString("conversation_id", conversationId).putString("accent_theme", selectedTheme).apply()
+            .putString("conversation_id", conversationId).putString("accent_theme", selectedTheme)
+            .putString("timezone", selectedTimezone).apply()
     }
     fun newChat() {
         conversationId = ""; messages.clear(); prompt = ""; pendingImages = emptyList()
@@ -174,7 +176,7 @@ private fun ShabGPTApp(context: Context) {
                 }
                 arr.put(item)
             }
-            val body = JSONObject().put("messages", arr).put("max_tokens", 768)
+            val body = JSONObject().put("messages", arr).put("max_tokens", 768).put("timezone", selectedTimezone)
             if (conversationId.isNotBlank()) body.put("conversation_id", conversationId)
             val result = api("/v1/chat/completions", "POST", token, body)
             val answer = result.getJSONArray("choices").getJSONObject(0).getJSONObject("message").getString("content")
@@ -234,8 +236,8 @@ private fun ShabGPTApp(context: Context) {
                     historyQuery, { historyQuery = it }, busy, error, onBack = { screen = "chat" }, onNew = { newChat() },
                     onRefresh = { scope.launch { busy = true; error = ""; try { loadHistory() } catch (e: Exception) { error = e.message ?: "History unavailable." }; busy = false } },
                     onOpen = { id -> scope.launch { busy = true; try { openConversation(id) } catch (e: Exception) { error = e.message ?: "Could not open conversation." }; busy = false } })
-                screen == "settings" -> SettingsScreen(accent, username, selectedTheme,
-                    onTheme = { selectedTheme = it; persistSession() }, onBack = { screen = "chat" },
+                screen == "settings" -> SettingsScreen(accent, username, selectedTheme, selectedTimezone,
+                    onTheme = { selectedTheme = it; persistSession() }, onTimezone = { selectedTimezone = it; persistSession() }, onBack = { screen = "chat" },
                     onDocs = { try { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(DOCS_URL))) } catch (_: Exception) { error = "Could not open API documentation." } },
                     onLogout = { scope.launch { try { api("/auth/logout", "POST", token) } catch (_: Exception) {}; prefs.edit().clear().apply(); token = ""; username = ""; conversationId = ""; messages.clear(); pendingImages = emptyList(); screen = "chat" } })
                 else -> ChatScreen(accent, username, messages, prompt, pendingImages, imageBusy,
@@ -645,8 +647,10 @@ private fun HistoryScreen(accent: AccentTheme, conversations: List<Conversation>
 }
 
 @Composable
-private fun SettingsScreen(accent: AccentTheme, username: String, selectedTheme: String, onTheme: (String) -> Unit,
-    onBack: () -> Unit, onDocs: () -> Unit, onLogout: () -> Unit) {
+private fun SettingsScreen(accent: AccentTheme, username: String, selectedTheme: String, selectedTimezone: String, onTheme: (String) -> Unit,
+    onTimezone: (String) -> Unit, onBack: () -> Unit, onDocs: () -> Unit, onLogout: () -> Unit) {
+    var timezoneDialog by remember { mutableStateOf(false) }
+    val timezoneOptions = remember { java.util.TimeZone.getAvailableIDs().distinct().sorted() }
     Column(Modifier.fillMaxSize().background(Ink).padding(20.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) { IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, "Back", tint = MainText) }; Text("Settings", color = MainText, fontSize = 22.sp, fontWeight = FontWeight.Bold) }
         Spacer(Modifier.height(24.dp)); Text("ACCOUNT", color = accent.primary, fontSize = 12.sp, fontWeight = FontWeight.Bold); Spacer(Modifier.height(8.dp))
@@ -662,6 +666,24 @@ private fun SettingsScreen(accent: AccentTheme, username: String, selectedTheme:
                 }
             }
         }
+        Spacer(Modifier.height(24.dp)); Text("REGIONAL PREFERENCES", color = accent.primary, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+        Text("Choose the timezone ShabGPT should use when answering questions about local time.", color = Muted, fontSize = 12.sp, modifier = Modifier.padding(top = 5.dp, bottom = 10.dp))
+        Surface(Modifier.fillMaxWidth().clickable { timezoneDialog = true }, color = Panel, shape = RoundedCornerShape(14.dp)) {
+            Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) { Text("Time zone", color = MainText, fontWeight = FontWeight.Medium); Text(selectedTimezone, color = Muted, fontSize = 12.sp) }
+                Text("Change", color = accent.primary, fontSize = 13.sp)
+            }
+        }
+        if (timezoneDialog) AlertDialog(
+            onDismissRequest = { timezoneDialog = false },
+            title = { Text("Choose time zone") },
+            text = { LazyColumn(Modifier.heightIn(max = 420.dp)) { items(timezoneOptions) { zone ->
+                Text(zone, color = if (zone == selectedTimezone) accent.primary else MainText,
+                    modifier = Modifier.fillMaxWidth().clickable { onTimezone(zone); timezoneDialog = false }.padding(vertical = 11.dp),
+                    fontWeight = if (zone == selectedTimezone) FontWeight.Bold else FontWeight.Normal)
+            } } },
+            confirmButton = { TextButton(onClick = { timezoneDialog = false }) { Text("Done") } }
+        )
         Spacer(Modifier.height(24.dp)); Text("DOCUMENTATION", color = accent.primary, fontSize = 12.sp, fontWeight = FontWeight.Bold)
         Surface(Modifier.fillMaxWidth().padding(top = 8.dp).clickable { onDocs() }, color = Panel, shape = RoundedCornerShape(14.dp)) {
             Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) { Text("API Documentation", color = MainText, modifier = Modifier.weight(1f), fontWeight = FontWeight.Medium); Text("Open ↗", color = accent.primary, fontSize = 13.sp) }
