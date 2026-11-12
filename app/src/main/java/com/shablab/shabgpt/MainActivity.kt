@@ -117,11 +117,22 @@ private fun ShabGPTApp(context: Context) {
     var error by remember { mutableStateOf("") }
     var info by remember { mutableStateOf("") }
     var screen by remember { mutableStateOf("chat") }
+    val backStack = remember { mutableStateListOf<String>() }
     var historyQuery by remember { mutableStateOf("") }
     var conversations by remember { mutableStateOf(listOf<Conversation>()) }
     var pendingImages by remember { mutableStateOf(listOf<String>()) }
     val messages = remember { mutableStateListOf<ChatMessage>() }
     val scope = rememberCoroutineScope()
+
+    fun navigateTo(destination: String) {
+        backStack.add(screen)
+        screen = destination
+    }
+    fun navigateBack() {
+        if (backStack.isNotEmpty()) screen = backStack.removeAt(backStack.lastIndex)
+        else screen = "chat"
+    }
+    BackHandler(enabled = token.isNotBlank() && backStack.isNotEmpty()) { navigateBack() }
 
     fun persistSession() {
         prefs.edit().putString("token", token).putString("username", username)
@@ -130,7 +141,7 @@ private fun ShabGPTApp(context: Context) {
     }
     fun newChat() {
         conversationId = ""; messages.clear(); prompt = ""; pendingImages = emptyList()
-        error = ""; info = ""; persistSession(); screen = "chat"
+        error = ""; info = ""; backStack.clear(); persistSession(); screen = "chat"
     }
     suspend fun loadHistory() {
         val result = api("/v1/conversations", "GET", token)
@@ -238,19 +249,19 @@ private fun ShabGPTApp(context: Context) {
                         }
                     })
                 screen == "history" -> HistoryScreen(accent, conversations.filter { it.title.contains(historyQuery, true) },
-                    historyQuery, { historyQuery = it }, busy, error, onBack = { screen = "chat" }, onNew = { newChat() },
+                    historyQuery, { historyQuery = it }, busy, error, onBack = { navigateBack() }, onNew = { newChat() },
                     onRefresh = { scope.launch { busy = true; error = ""; try { loadHistory() } catch (e: Exception) { error = e.message ?: "History unavailable." }; busy = false } },
                     onOpen = { id -> scope.launch { busy = true; try { openConversation(id) } catch (e: Exception) { error = e.message ?: "Could not open conversation." }; busy = false } })
                 screen == "settings" -> SettingsScreen(accent, username, selectedTheme, selectedTimezone,
                     onTheme = { selectedTheme = it; persistSession() }, onTimezone = { selectedTimezone = it; persistSession() }, onBack = { screen = "chat" },
                     onDocs = { try { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(DOCS_URL))) } catch (_: Exception) { error = "Could not open API documentation." } },
-                    onLogout = { scope.launch { try { api("/auth/logout", "POST", token) } catch (_: Exception) {}; prefs.edit().clear().apply(); token = ""; username = ""; conversationId = ""; messages.clear(); pendingImages = emptyList(); screen = "chat" } })
+                    onLogout = { scope.launch { try { api("/auth/logout", "POST", token) } catch (_: Exception) {}; prefs.edit().clear().apply(); token = ""; username = ""; conversationId = ""; messages.clear(); pendingImages = emptyList(); backStack.clear(); screen = "chat" } })
                 else -> ChatScreen(accent, username, messages, prompt, pendingImages, imageBusy,
                     onPrompt = { prompt = it }, onAttach = { if (!imageBusy && pendingImages.size < 3) imagePicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
                     onRemoveImage = { index -> pendingImages = pendingImages.toMutableList().also { it.removeAt(index) } },
                     busy = busy, error = error, info = info,
-                    onHistory = { scope.launch { busy = true; error = ""; try { loadHistory(); screen = "history" } catch (e: Exception) { error = e.message ?: "Could not load history." }; busy = false } },
-                    onSettings = { screen = "settings" }, onNewChat = { newChat() },
+                    onHistory = { scope.launch { busy = true; error = ""; try { loadHistory(); navigateTo("history") } catch (e: Exception) { error = e.message ?: "Could not load history." }; busy = false } },
+                    onSettings = { navigateTo("settings") }, onNewChat = { newChat() },
                     onCopy = { text -> val cm = context.getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager; cm.setPrimaryClip(ClipData.newPlainText("ShabGPT response", text)); info = "Copied to clipboard" },
                     onShare = { text -> val send = Intent(Intent.ACTION_SEND).apply { type = "text/plain"; putExtra(Intent.EXTRA_TEXT, text) }; context.startActivity(Intent.createChooser(send, "Share response")) },
                     onRetry = {
