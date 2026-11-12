@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.util.Base64
 import android.widget.TextView
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.PickVisualMediaRequest
@@ -262,16 +263,103 @@ private fun ShabGPTApp(context: Context) {
 private fun AuthScreen(accent: AccentTheme, register: Boolean, onRegister: (Boolean) -> Unit,
     username: String, onUsername: (String) -> Unit, password: String, onPassword: (String) -> Unit,
     busy: Boolean, error: String, onSubmit: () -> Unit) {
-    Column(Modifier.fillMaxSize().background(Ink).imePadding().padding(horizontal = 26.dp), verticalArrangement = Arrangement.Center) {
-        Row(verticalAlignment = Alignment.CenterVertically) { BrandMark(48, accent); Spacer(Modifier.width(12.dp)); Text("ShabGPT", color = MainText, fontSize = 26.sp, fontWeight = FontWeight.Bold) }
-        Spacer(Modifier.height(10.dp)); Text("Beyond the Existing.", color = accent.primary, fontSize = 15.sp)
-        Spacer(Modifier.height(34.dp)); Text(if (register) "Create your account" else "Welcome back", color = MainText, fontSize = 25.sp, fontWeight = FontWeight.SemiBold)
-        Spacer(Modifier.height(18.dp)); OutlinedTextField(username, onUsername, Modifier.fillMaxWidth(), label = { Text("Username") }, singleLine = true, keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next))
-        Spacer(Modifier.height(12.dp)); OutlinedTextField(password, onPassword, Modifier.fillMaxWidth(), label = { Text("Password") }, visualTransformation = PasswordVisualTransformation(), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done), singleLine = true)
-        if (register) { Spacer(Modifier.height(8.dp)); Text("Username: 3–24 letters, numbers or underscores. Password: 10–128 characters.", color = Muted, fontSize = 12.sp) }
-        if (error.isNotBlank()) { Spacer(Modifier.height(12.dp)); Text(error, color = Danger, fontSize = 13.sp) }
-        Spacer(Modifier.height(20.dp)); Button(onClick = onSubmit, Modifier.fillMaxWidth().height(54.dp), enabled = !busy && username.isNotBlank() && password.isNotBlank()) { Text(if (busy) "Please wait…" else if (register) "Create account" else "Sign in", fontSize = 16.sp) }
-        TextButton(onClick = { onRegister(!register) }, Modifier.align(Alignment.CenterHorizontally)) { Text(if (register) "Already have an account? Sign in" else "Create an account", color = accent.primary) }
+    // Android system Back returns from registration to sign-in instead of closing the app.
+    BackHandler(enabled = register) { onRegister(false) }
+
+    val fieldColors = TextFieldDefaults.colors(
+        focusedContainerColor = Panel2,
+        unfocusedContainerColor = Panel,
+        disabledContainerColor = Panel,
+        focusedIndicatorColor = Color.Transparent,
+        unfocusedIndicatorColor = Color.Transparent,
+        cursorColor = accent.primary,
+        focusedTextColor = MainText,
+        unfocusedTextColor = MainText,
+        focusedPlaceholderColor = Muted,
+        unfocusedPlaceholderColor = Muted
+    )
+
+    Column(
+        Modifier.fillMaxSize().background(Ink).imePadding()
+            .padding(horizontal = 26.dp, vertical = 28.dp),
+        verticalArrangement = Arrangement.Center
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            BrandMark(48, accent)
+            Spacer(Modifier.width(13.dp))
+            Column {
+                Text("ShabGPT", color = MainText, fontSize = 27.sp, fontWeight = FontWeight.Bold, letterSpacing = (-0.6).sp)
+                Text("BEYOND THE EXISTING", color = accent.primary, fontSize = 10.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.5.sp)
+            }
+        }
+        Spacer(Modifier.height(46.dp))
+        Text(
+            if (register) "Create your account" else "Welcome back",
+            color = MainText, fontSize = 30.sp, lineHeight = 36.sp,
+            fontWeight = FontWeight.Bold, letterSpacing = (-0.8).sp
+        )
+        Spacer(Modifier.height(8.dp))
+        Text(
+            if (register) "A space for your ideas starts here." else "Sign in to continue your conversations.",
+            color = Muted, fontSize = 14.sp
+        )
+        Spacer(Modifier.height(30.dp))
+
+        Text("USERNAME", color = Muted, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.2.sp)
+        Spacer(Modifier.height(8.dp))
+        TextField(
+            value = username, onValueChange = onUsername,
+            modifier = Modifier.fillMaxWidth(),
+            placeholder = { Text("Your username") },
+            singleLine = true,
+            shape = RoundedCornerShape(17.dp),
+            colors = fieldColors,
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
+        )
+        Spacer(Modifier.height(19.dp))
+        Text("PASSWORD", color = Muted, fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.2.sp)
+        Spacer(Modifier.height(8.dp))
+        TextField(
+            value = password, onValueChange = onPassword,
+            modifier = Modifier.fillMaxWidth(),
+            placeholder = { Text("Your password") },
+            singleLine = true,
+            shape = RoundedCornerShape(17.dp),
+            colors = fieldColors,
+            visualTransformation = PasswordVisualTransformation(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done)
+        )
+        if (register) {
+            Spacer(Modifier.height(13.dp))
+            Text("3–24 characters for username · 10–128 for password", color = Muted, fontSize = 11.sp, lineHeight = 17.sp)
+        }
+        if (error.isNotBlank()) {
+            Spacer(Modifier.height(15.dp))
+            Text(error, color = Danger, fontSize = 13.sp, lineHeight = 19.sp)
+        }
+        Spacer(Modifier.height(25.dp))
+        Button(
+            onClick = onSubmit,
+            modifier = Modifier.fillMaxWidth().height(58.dp),
+            enabled = !busy && username.isNotBlank() && password.isNotBlank(),
+            shape = RoundedCornerShape(18.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = accent.primary, contentColor = Ink)
+        ) {
+            Text(
+                if (busy) "Please wait…" else if (register) "Create account" else "Sign in",
+                fontSize = 15.sp, fontWeight = FontWeight.Bold
+            )
+        }
+        Spacer(Modifier.height(16.dp))
+        TextButton(
+            onClick = { onRegister(!register) },
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        ) {
+            Text(
+                if (register) "Already have an account?  Sign in" else "New to ShabGPT?  Create an account",
+                color = accent.primary, fontSize = 13.sp, fontWeight = FontWeight.SemiBold
+            )
+        }
     }
 }
 
