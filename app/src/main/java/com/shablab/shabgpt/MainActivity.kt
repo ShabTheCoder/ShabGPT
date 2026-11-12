@@ -385,7 +385,7 @@ private fun ChatScreen(accent: AccentTheme, username: String, messages: List<Cha
     Column(Modifier.fillMaxSize().background(Ink)) {
         // Compact app bar with a quiet divider instead of a heavy boxed header.
         Row(
-            Modifier.fillMaxWidth().background(Ink).padding(horizontal = 12.dp, vertical = 9.dp),
+            Modifier.fillMaxWidth().background(Color(0xFF101014)).padding(horizontal = 12.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onHistory, modifier = Modifier.size(42.dp)) {
@@ -453,16 +453,12 @@ private fun ChatScreen(accent: AccentTheme, username: String, messages: List<Cha
                         }
                         Spacer(Modifier.height(7.dp))
                         Surface(
-                            color = if (isUser) Panel2 else Ink,
-                            border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = if (isUser) 0.035f else 0.075f)),
-                            shape = RoundedCornerShape(
-                                topStart = 20.dp, topEnd = 20.dp,
-                                bottomStart = if (isUser) 20.dp else 7.dp,
-                                bottomEnd = if (isUser) 7.dp else 20.dp
-                            ),
-                            modifier = Modifier.fillMaxWidth(if (isUser) 0.84f else 1f)
+                            color = if (isUser) Color(0xFF292432) else Color.Transparent,
+                            border = if (isUser) androidx.compose.foundation.BorderStroke(1.dp, accent.primary.copy(alpha = 0.16f)) else null,
+                            shape = if (isUser) RoundedCornerShape(22.dp) else RoundedCornerShape(0.dp),
+                            modifier = Modifier.fillMaxWidth(if (isUser) 0.88f else 1f)
                         ) {
-                            Column(Modifier.padding(horizontal = 16.dp, vertical = 15.dp)) {
+                            Column(Modifier.padding(horizontal = if (isUser) 16.dp else 0.dp, vertical = if (isUser) 14.dp else 4.dp)) {
                                 if (msg.images.isNotEmpty()) {
                                     Row(
                                         Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
@@ -558,8 +554,8 @@ private fun ChatScreen(accent: AccentTheme, username: String, messages: List<Cha
                 }
             }
         }
-        Column(Modifier.fillMaxWidth().background(Ink).padding(horizontal = 12.dp, vertical = 8.dp)) {
-            Surface(color = Panel, shape = RoundedCornerShape(25.dp),
+        Column(Modifier.fillMaxWidth().background(Color(0xFF101014)).padding(horizontal = 12.dp, vertical = 10.dp)) {
+            Surface(color = Color(0xFF1B1921), shape = RoundedCornerShape(25.dp),
                 border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.08f)),
                 modifier = Modifier.fillMaxWidth()) {
             Row(verticalAlignment = Alignment.Bottom) {
