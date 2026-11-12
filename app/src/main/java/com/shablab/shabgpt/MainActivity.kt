@@ -307,7 +307,7 @@ private fun AuthScreen(accent: AccentTheme, register: Boolean, onRegister: (Bool
             BrandMark(48, accent)
             Spacer(Modifier.width(13.dp))
             Column {
-                Text("ShabGPT", color = MainText, fontSize = 27.sp, fontWeight = FontWeight.Bold, letterSpacing = (-0.6).sp)
+                Text("ShabGPT for Mobile", color = MainText, fontSize = 23.sp, fontWeight = FontWeight.Bold, letterSpacing = (-0.6).sp)
                 Text("BEYOND THE EXISTING", color = accent.primary, fontSize = 10.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.5.sp)
             }
         }
@@ -403,7 +403,7 @@ private fun ChatScreen(accent: AccentTheme, username: String, messages: List<Cha
                 Icon(Icons.Default.Menu, "Conversation history", tint = Muted, modifier = Modifier.size(22.dp))
             }
             Column(Modifier.weight(1f).padding(start = 5.dp)) {
-                Text("ShabGPT", color = MainText, fontSize = 17.sp, fontWeight = FontWeight.SemiBold, letterSpacing = (-0.3).sp)
+                Text("ShabGPT for Mobile", color = MainText, fontSize = 16.sp, fontWeight = FontWeight.SemiBold, letterSpacing = (-0.3).sp)
                 Text("Beyond the Existing", color = Muted, fontSize = 10.sp)
             }
             IconButton(onClick = onNewChat, modifier = Modifier.size(42.dp)) {
