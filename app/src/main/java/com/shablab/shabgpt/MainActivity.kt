@@ -383,47 +383,80 @@ private fun ChatScreen(accent: AccentTheme, username: String, messages: List<Cha
     }
 
     Column(Modifier.fillMaxSize().background(Ink)) {
-        // Compact app bar with a quiet divider instead of a heavy boxed header.
+        // Website-inspired compact header: restrained branding, subtle divider, clear actions.
         Row(
-            Modifier.fillMaxWidth().background(Color(0xFF101014)).padding(horizontal = 12.dp, vertical = 10.dp),
+            Modifier.fillMaxWidth().background(Color(0xFF0C0B10)).padding(horizontal = 13.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = onHistory, modifier = Modifier.size(42.dp)) {
-                Icon(Icons.Default.Menu, "Open conversation history", tint = MainText)
+            IconButton(onClick = onHistory, modifier = Modifier.size(44.dp)) {
+                Icon(Icons.Default.Menu, "Open conversation history", tint = Muted)
             }
-            BrandMark(38, accent)
-            Spacer(Modifier.width(11.dp))
+            BrandMark(32, accent)
+            Spacer(Modifier.width(10.dp))
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.Center) {
-                Text("ShabGPT", color = MainText, fontWeight = FontWeight.SemiBold, fontSize = 18.sp, letterSpacing = (-0.3).sp)
-                Text("PERSONAL AI ASSISTANT", color = Muted, fontSize = 9.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.1.sp)
+                Text("ShabGPT", color = MainText, fontWeight = FontWeight.Bold, fontSize = 16.sp, letterSpacing = (-0.35).sp)
+                Text("PERSONAL AI ASSISTANT", color = Muted, fontSize = 8.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.05.sp)
+            }
+            Surface(color = Panel2, shape = RoundedCornerShape(50), border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.07f))) {
+                Row(Modifier.padding(horizontal = 10.dp, vertical = 7.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Box(Modifier.size(6.dp).background(accent.primary, CircleShape))
+                    Spacer(Modifier.width(6.dp))
+                    Text("Gemma 4", color = Muted, fontSize = 10.sp)
+                }
             }
             IconButton(onClick = onNewChat, modifier = Modifier.size(42.dp)) {
-                Icon(Icons.Default.Add, "New chat", tint = MainText, modifier = Modifier.size(25.dp))
+                Icon(Icons.Default.Add, "New chat", tint = MainText, modifier = Modifier.size(23.dp))
             }
             IconButton(onClick = onSettings, modifier = Modifier.size(42.dp)) {
-                Icon(Icons.Default.Settings, "Settings", tint = Muted, modifier = Modifier.size(23.dp))
+                Icon(Icons.Default.Settings, "Settings", tint = Muted, modifier = Modifier.size(21.dp))
             }
         }
-        Box(Modifier.fillMaxWidth().height(1.dp).background(Color.White.copy(alpha = 0.045f)))
+        Box(Modifier.fillMaxWidth().height(1.dp).background(Color.White.copy(alpha = 0.055f)))
 
         if (messages.isEmpty()) {
             Column(
-                Modifier.fillMaxWidth().weight(1f).padding(horizontal = 25.dp),
-                verticalArrangement = Arrangement.Center
+                Modifier.fillMaxWidth().weight(1f).padding(horizontal = 20.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text("Beyond the Existing.", color = MainText, fontSize = 30.sp, fontWeight = FontWeight.Bold, letterSpacing = (-0.8).sp)
+                BrandMark(62, accent)
+                Spacer(Modifier.height(23.dp))
+                Text(
+                    "Beyond the Existing.",
+                    color = MainText, fontSize = 30.sp, lineHeight = 36.sp,
+                    fontWeight = FontWeight.ExtraBold, letterSpacing = (-1.1).sp,
+                    textAlign = TextAlign.Center
+                )
                 Spacer(Modifier.height(9.dp))
-                Text("What would you like to explore today?", color = Muted, fontSize = 15.sp)
-                Spacer(Modifier.height(28.dp))
-                listOf("Explain a complex idea simply", "Help me plan a project", "Explore something unexpected", "Write or improve something").forEach { suggestion ->
-                    Surface(
-                        Modifier.fillMaxWidth().padding(vertical = 4.dp).clickable { onPrompt(suggestion) },
-                        color = Panel, shape = RoundedCornerShape(19.dp)
-                    ) {
-                        Row(Modifier.padding(horizontal = 17.dp, vertical = 17.dp), verticalAlignment = Alignment.CenterVertically) {
-                            Text(suggestion, color = MainText, fontWeight = FontWeight.Medium, fontSize = 14.sp, modifier = Modifier.weight(1f))
-                            Text("↗", color = accent.primary, fontSize = 19.sp)
+                Text(
+                    "A space to think, explore ideas, and build something new.",
+                    color = Muted, fontSize = 13.sp, lineHeight = 20.sp,
+                    textAlign = TextAlign.Center, modifier = Modifier.widthIn(max = 310.dp)
+                )
+                Spacer(Modifier.height(27.dp))
+                val suggestions = listOf(
+                    "Explain a complex idea simply",
+                    "Help me plan a project",
+                    "Explore something unexpected",
+                    "Write or improve something"
+                )
+                suggestions.chunked(2).forEach { pair ->
+                    Row(Modifier.fillMaxWidth().widthIn(max = 560.dp), horizontalArrangement = Arrangement.spacedBy(9.dp)) {
+                        pair.forEach { suggestion ->
+                            Surface(
+                                Modifier.weight(1f).padding(vertical = 4.dp).clickable { onPrompt(suggestion) },
+                                color = Color(0xFF15131B),
+                                shape = RoundedCornerShape(15.dp),
+                                border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.075f))
+                            ) {
+                                Row(Modifier.padding(horizontal = 13.dp, vertical = 15.dp), verticalAlignment = Alignment.CenterVertically) {
+                                    Text(suggestion, color = MainText, fontWeight = FontWeight.Medium, fontSize = 11.sp,
+                                        lineHeight = 16.sp, modifier = Modifier.weight(1f))
+                                    Text("↗", color = accent.primary, fontSize = 16.sp)
+                                }
+                            }
                         }
+                        if (pair.size == 1) Spacer(Modifier.weight(1f))
                     }
                 }
             }
@@ -431,78 +464,68 @@ private fun ChatScreen(accent: AccentTheme, username: String, messages: List<Cha
             LazyColumn(
                 state = listState,
                 modifier = Modifier.weight(1f).fillMaxWidth(),
-                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 20.dp, bottom = 22.dp),
+                contentPadding = PaddingValues(start = 15.dp, end = 15.dp, top = 17.dp, bottom = 22.dp),
                 verticalArrangement = Arrangement.spacedBy(19.dp)
             ) {
                 items(messages) { msg ->
                     val isUser = msg.role == "user"
-                    Column(
+                    Row(
                         Modifier.fillMaxWidth(),
-                        horizontalAlignment = if (isUser) Alignment.End else Alignment.Start
+                        horizontalArrangement = if (isUser) Arrangement.End else Arrangement.Start,
+                        verticalAlignment = Alignment.Top
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            if (!isUser) {
-                                Box(Modifier.size(7.dp).background(accent.secondary, CircleShape))
-                                Spacer(Modifier.width(7.dp))
-                            }
+                        if (!isUser) {
+                            BrandMark(29, accent)
+                            Spacer(Modifier.width(10.dp))
+                        }
+                        Column(
+                            Modifier.widthIn(max = 620.dp).fillMaxWidth(if (isUser) 0.88f else 0.91f),
+                            horizontalAlignment = if (isUser) Alignment.End else Alignment.Start
+                        ) {
                             Text(
                                 if (isUser) "You" else "ShabGPT",
                                 color = if (isUser) accent.primary else accent.secondary,
-                                fontSize = 12.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 0.2.sp
+                                fontSize = 10.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 0.35.sp,
+                                modifier = Modifier.padding(horizontal = if (isUser) 5.dp else 2.dp, vertical = 3.dp)
                             )
-                        }
-                        Spacer(Modifier.height(7.dp))
-                        Surface(
-                            color = if (isUser) Color(0xFF292432) else Color.Transparent,
-                            border = if (isUser) androidx.compose.foundation.BorderStroke(1.dp, accent.primary.copy(alpha = 0.16f)) else null,
-                            shape = if (isUser) RoundedCornerShape(22.dp) else RoundedCornerShape(0.dp),
-                            modifier = Modifier.fillMaxWidth(if (isUser) 0.88f else 1f)
-                        ) {
-                            Column(Modifier.padding(horizontal = if (isUser) 16.dp else 0.dp, vertical = if (isUser) 14.dp else 4.dp)) {
-                                if (msg.images.isNotEmpty()) {
-                                    Row(
-                                        Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                    ) {
-                                        msg.images.forEach { data ->
-                                            val bitmap = remember(data) { decodeDataUrl(data) }
-                                            if (bitmap != null) Image(
-                                                bitmap.asImageBitmap(), "Attached image",
-                                                Modifier.size(148.dp).background(Panel2, RoundedCornerShape(13.dp)),
-                                                contentScale = ContentScale.Crop
-                                            )
+                            Surface(
+                                color = if (isUser) Color(0xFF211D2A) else Color.Transparent,
+                                border = if (isUser) androidx.compose.foundation.BorderStroke(1.dp, accent.primary.copy(alpha = 0.17f)) else null,
+                                shape = if (isUser) RoundedCornerShape(topStart = 18.dp, topEnd = 6.dp, bottomEnd = 18.dp, bottomStart = 18.dp) else RoundedCornerShape(0.dp),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Column(Modifier.padding(horizontal = if (isUser) 14.dp else 2.dp, vertical = if (isUser) 12.dp else 4.dp)) {
+                                    if (msg.images.isNotEmpty()) {
+                                        Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                            msg.images.forEach { data ->
+                                                val bitmap = remember(data) { decodeDataUrl(data) }
+                                                if (bitmap != null) Image(
+                                                    bitmap.asImageBitmap(), "Attached image",
+                                                    Modifier.size(142.dp).background(Panel2, RoundedCornerShape(12.dp)),
+                                                    contentScale = ContentScale.Crop
+                                                )
+                                            }
+                                        }
+                                        if (msg.content.isNotBlank()) Spacer(Modifier.height(9.dp))
+                                    }
+                                    if (msg.content.isNotBlank()) {
+                                        if (isUser) {
+                                            SelectionContainer { Text(msg.content, color = MainText, fontSize = 14.sp, lineHeight = 22.sp) }
+                                        } else {
+                                            MarkdownText(msg.content, accent)
                                         }
                                     }
-                                    if (msg.content.isNotBlank()) Spacer(Modifier.height(11.dp))
                                 }
-                                if (msg.content.isNotBlank()) {
-                                    if (isUser) {
-                                        SelectionContainer {
-                                            Text(msg.content, color = MainText, fontSize = 15.sp, lineHeight = 23.sp)
-                                        }
-                                    } else {
-                                        MarkdownText(msg.content, accent)
+                            }
+                            if (!isUser) {
+                                Row(horizontalArrangement = Arrangement.spacedBy(3.dp), modifier = Modifier.padding(start = 0.dp, top = 3.dp)) {
+                                    TextButton(onClick = { onCopy(msg.content) }, contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)) {
+                                        Icon(Icons.Default.ContentCopy, null, Modifier.size(13.dp), tint = Muted)
+                                        Spacer(Modifier.width(5.dp)); Text("Copy", fontSize = 11.sp, color = Muted)
                                     }
-                                }
-                                if (!isUser) {
-                                    Spacer(Modifier.height(7.dp))
-                                    Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                                        TextButton(
-                                            onClick = { onCopy(msg.content) },
-                                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 3.dp)
-                                        ) {
-                                            Icon(Icons.Default.ContentCopy, null, Modifier.size(14.dp), tint = accent.secondary)
-                                            Spacer(Modifier.width(5.dp))
-                                            Text("Copy", fontSize = 12.sp, color = accent.secondary)
-                                        }
-                                        TextButton(
-                                            onClick = { onShare(msg.content) },
-                                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 3.dp)
-                                        ) {
-                                            Icon(Icons.Default.Share, null, Modifier.size(14.dp), tint = accent.secondary)
-                                            Spacer(Modifier.width(5.dp))
-                                            Text("Share", fontSize = 12.sp, color = accent.secondary)
-                                        }
+                                    TextButton(onClick = { onShare(msg.content) }, contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)) {
+                                        Icon(Icons.Default.Share, null, Modifier.size(13.dp), tint = Muted)
+                                        Spacer(Modifier.width(5.dp)); Text("Share", fontSize = 11.sp, color = Muted)
                                     }
                                 }
                             }
@@ -511,10 +534,10 @@ private fun ChatScreen(accent: AccentTheme, username: String, messages: List<Cha
                 }
                 if (busy) {
                     item {
-                        Row(Modifier.padding(vertical = 3.dp), verticalAlignment = Alignment.CenterVertically) {
-                            CircularProgressIndicator(Modifier.size(17.dp), color = accent.primary, strokeWidth = 2.dp)
-                            Spacer(Modifier.width(10.dp))
-                            Text("ShabGPT is thinking…", color = Muted, fontSize = 13.sp)
+                        Row(Modifier.padding(start = 39.dp, top = 2.dp), verticalAlignment = Alignment.CenterVertically) {
+                            CircularProgressIndicator(Modifier.size(15.dp), color = accent.primary, strokeWidth = 2.dp)
+                            Spacer(Modifier.width(9.dp))
+                            Text("ShabGPT is thinking…", color = Muted, fontSize = 12.sp)
                         }
                     }
                 }
@@ -522,95 +545,71 @@ private fun ChatScreen(accent: AccentTheme, username: String, messages: List<Cha
         }
 
         if (error.isNotBlank()) {
-            Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 5.dp), verticalAlignment = Alignment.CenterVertically) {
+            Row(Modifier.fillMaxWidth().padding(horizontal = 15.dp, vertical = 5.dp), verticalAlignment = Alignment.CenterVertically) {
                 Text(error, color = Danger, fontSize = 12.sp, modifier = Modifier.weight(1f))
                 TextButton(onClick = onRetry) { Icon(Icons.Default.Refresh, null); Text("Retry") }
             }
         }
         if (info.isNotBlank()) {
-            Text(info, color = accent.secondary, fontSize = 11.sp, modifier = Modifier.padding(start = 17.dp, bottom = 4.dp))
+            Text(info, color = accent.secondary, fontSize = 10.sp, modifier = Modifier.padding(start = 17.dp, bottom = 4.dp))
         }
 
-        // Attachment previews sit above a single floating-style composer.
         if (pendingImages.isNotEmpty()) {
             Row(
-                Modifier.fillMaxWidth().background(Panel).horizontalScroll(rememberScrollState())
+                Modifier.fillMaxWidth().background(Color(0xFF0D0C11)).horizontalScroll(rememberScrollState())
                     .padding(horizontal = 14.dp, vertical = 9.dp),
                 horizontalArrangement = Arrangement.spacedBy(9.dp)
             ) {
                 pendingImages.forEachIndexed { index, data ->
                     Box {
                         val bitmap = remember(data) { decodeDataUrl(data) }
-                        if (bitmap != null) Image(
-                            bitmap.asImageBitmap(), "Image attachment preview",
-                            Modifier.size(68.dp).background(Panel2, RoundedCornerShape(12.dp)),
-                            contentScale = ContentScale.Crop
-                        )
-                        IconButton(
-                            onClick = { onRemoveImage(index) },
-                            modifier = Modifier.align(Alignment.TopEnd).size(23.dp).background(Ink.copy(alpha = 0.88f), CircleShape)
-                        ) { Icon(Icons.Default.Close, "Remove image", tint = MainText, modifier = Modifier.size(14.dp)) }
+                        if (bitmap != null) Image(bitmap.asImageBitmap(), "Image attachment preview",
+                            Modifier.size(64.dp).background(Panel2, RoundedCornerShape(11.dp)), contentScale = ContentScale.Crop)
+                        IconButton(onClick = { onRemoveImage(index) },
+                            modifier = Modifier.align(Alignment.TopEnd).size(23.dp).background(Ink.copy(alpha = 0.9f), CircleShape)) {
+                            Icon(Icons.Default.Close, "Remove image", tint = MainText, modifier = Modifier.size(14.dp))
+                        }
                     }
                 }
             }
         }
-        Column(Modifier.fillMaxWidth().background(Color(0xFF101014)).padding(horizontal = 12.dp, vertical = 10.dp)) {
-            Surface(color = Color(0xFF1B1921), shape = RoundedCornerShape(25.dp),
-                border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.08f)),
-                modifier = Modifier.fillMaxWidth()) {
-            Row(verticalAlignment = Alignment.Bottom) {
-                IconButton(
-                    onClick = onAttach,
-                    enabled = !busy && !imageBusy && pendingImages.size < 3,
-                    modifier = Modifier.size(46.dp)
-                ) {
-                    if (imageBusy) CircularProgressIndicator(Modifier.size(19.dp), color = accent.primary, strokeWidth = 2.dp)
-                    else Icon(Icons.Default.AttachFile, "Attach up to three images", tint = accent.secondary, modifier = Modifier.size(23.dp))
-                }
-                Spacer(Modifier.width(3.dp))
-                TextField(
-                    value = prompt,
-                    onValueChange = onPrompt,
-                    modifier = Modifier.weight(1f),
-                    placeholder = { Text("Message ShabGPT…", color = Muted, fontSize = 14.sp) },
-                    maxLines = 5,
-                    shape = RoundedCornerShape(25.dp),
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Panel2,
-                        unfocusedContainerColor = Panel2,
-                        disabledContainerColor = Panel2,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent,
-                        cursorColor = accent.primary,
-                        focusedTextColor = MainText,
-                        unfocusedTextColor = MainText
-                    ),
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Default)
-                )
-                Spacer(Modifier.width(8.dp))
-                FilledIconButton(
-                    onClick = onSend,
-                    enabled = !busy && (prompt.isNotBlank() || pendingImages.isNotEmpty()),
-                    modifier = Modifier.size(48.dp),
-                    shape = CircleShape,
-                    colors = IconButtonDefaults.filledIconButtonColors(
-                        containerColor = accent.secondary,
-                        contentColor = Ink,
-                        disabledContainerColor = Color(0xFF34313A),
-                        disabledContentColor = Color(0xFF77717F)
+        Column(Modifier.fillMaxWidth().background(Color(0xFF0A090D)).padding(horizontal = 12.dp, vertical = 9.dp)) {
+            Surface(
+                color = Color(0xFF19171F), shape = RoundedCornerShape(22.dp),
+                border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.105f)),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(verticalAlignment = Alignment.Bottom) {
+                    IconButton(onClick = onAttach, enabled = !busy && !imageBusy && pendingImages.size < 3, modifier = Modifier.size(48.dp)) {
+                        if (imageBusy) CircularProgressIndicator(Modifier.size(18.dp), color = accent.primary, strokeWidth = 2.dp)
+                        else Icon(Icons.Default.AttachFile, "Attach up to three images", tint = Muted, modifier = Modifier.size(22.dp))
+                    }
+                    TextField(
+                        value = prompt, onValueChange = onPrompt, modifier = Modifier.weight(1f),
+                        placeholder = { Text("Message ShabGPT…", color = Muted, fontSize = 14.sp) },
+                        maxLines = 5, shape = RoundedCornerShape(20.dp),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.Transparent, unfocusedContainerColor = Color.Transparent,
+                            disabledContainerColor = Color.Transparent, focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent, cursorColor = accent.primary,
+                            focusedTextColor = MainText, unfocusedTextColor = MainText
+                        ),
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Default)
                     )
-                ) {
-                    Icon(Icons.Default.Send, "Send message", modifier = Modifier.size(20.dp))
+                    Spacer(Modifier.width(5.dp))
+                    FilledIconButton(
+                        onClick = onSend, enabled = !busy && (prompt.isNotBlank() || pendingImages.isNotEmpty()),
+                        modifier = Modifier.padding(end = 7.dp, bottom = 7.dp).size(42.dp), shape = RoundedCornerShape(14.dp),
+                        colors = IconButtonDefaults.filledIconButtonColors(
+                            containerColor = accent.primary, contentColor = Ink,
+                            disabledContainerColor = Color(0xFF34313A), disabledContentColor = Color(0xFF77717F)
+                        )
+                    ) { Icon(Icons.Default.Send, "Send message", modifier = Modifier.size(19.dp)) }
                 }
             }
-            }
-            Spacer(Modifier.height(8.dp))
-            Text(
-                "ShabGPT can make mistakes. Check important information.",
-                color = Color(0xFF77717F), fontSize = 10.sp,
-                modifier = Modifier.fillMaxWidth().padding(bottom = 2.dp),
-                textAlign = TextAlign.Center
-            )
+            Spacer(Modifier.height(7.dp))
+            Text("ShabGPT can make mistakes. Check important information.", color = Color(0xFF77717F),
+                fontSize = 9.sp, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
         }
     }
 }
