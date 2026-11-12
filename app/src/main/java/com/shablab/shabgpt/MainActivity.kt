@@ -163,6 +163,10 @@ private fun ShabGPTApp(context: Context) {
         prompt = ""; pendingImages = emptyList(); busy = true
         try {
             val arr = JSONArray()
+            val userZone = java.time.ZoneId.of(selectedTimezone)
+            val localNow = java.time.ZonedDateTime.now(userZone)
+            val timeContext = "The user's selected time zone is $selectedTimezone. The current local date and time for the user is ${localNow.format(java.time.format.DateTimeFormatter.ofPattern("EEEE, yyyy-MM-dd HH:mm:ss z"))}. Use this supplied local time when answering questions about the current time or date. Do not guess the user's time zone."
+            arr.put(JSONObject().put("role", "system").put("content", timeContext))
             messages.forEach { msg ->
                 val item = JSONObject().put("role", msg.role)
                 if (msg.images.isEmpty()) item.put("content", msg.content)
