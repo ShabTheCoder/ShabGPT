@@ -59,6 +59,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.window.Dialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -664,17 +665,21 @@ private fun SettingsScreen(accent: AccentTheme, username: String, selectedTheme:
                 Text("Change", color = accent.primary, fontSize = 13.sp)
             }
         }
-        if (timezoneDialog) AlertDialog(
-            onDismissRequest = { timezoneDialog = false },
-            title = { Text("Choose time zone") },
-            text = {
-                Column {
+        if (timezoneDialog) Dialog(onDismissRequest = { timezoneDialog = false }) {
+            Surface(
+                modifier = Modifier.fillMaxWidth().heightIn(max = 590.dp),
+                color = Panel2,
+                shape = RoundedCornerShape(24.dp)
+            ) {
+                Column(Modifier.fillMaxWidth().padding(20.dp)) {
+                    Text("Choose time zone", color = MainText, fontSize = 21.sp, fontWeight = FontWeight.SemiBold)
+                    Spacer(Modifier.height(16.dp))
                     OutlinedTextField(
                         value = timezoneQuery,
                         onValueChange = { timezoneQuery = it },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
-                        placeholder = { Text("Search time zones") },
+                        placeholder = { Text("Search time zones", color = Muted) },
                         leadingIcon = { Icon(Icons.Default.Search, null, tint = Muted) },
                         trailingIcon = {
                             if (timezoneQuery.isNotEmpty()) {
@@ -692,22 +697,30 @@ private fun SettingsScreen(accent: AccentTheme, username: String, selectedTheme:
                             cursorColor = accent.primary
                         )
                     )
-                    Spacer(Modifier.height(10.dp))
+                    Spacer(Modifier.height(12.dp))
                     if (filteredTimezones.isEmpty()) {
                         Text("No matching time zones", color = Muted, modifier = Modifier.padding(12.dp))
                     } else {
-                        LazyColumn(Modifier.heightIn(max = 340.dp)) {
+                        LazyColumn(Modifier.weight(1f, fill = false).heightIn(max = 360.dp)) {
                             items(filteredTimezones) { zone ->
-                                Text(zone, color = if (zone == selectedTimezone) accent.primary else MainText,
-                                    modifier = Modifier.fillMaxWidth().clickable { onTimezone(zone); timezoneDialog = false }.padding(vertical = 12.dp, horizontal = 4.dp),
-                                    fontWeight = if (zone == selectedTimezone) FontWeight.Bold else FontWeight.Normal)
+                                Text(
+                                    zone,
+                                    color = if (zone == selectedTimezone) accent.primary else MainText,
+                                    modifier = Modifier.fillMaxWidth()
+                                        .clickable { onTimezone(zone); timezoneDialog = false }
+                                        .padding(vertical = 13.dp, horizontal = 5.dp),
+                                    fontWeight = if (zone == selectedTimezone) FontWeight.Bold else FontWeight.Normal
+                                )
                             }
                         }
                     }
+                    Spacer(Modifier.height(10.dp))
+                    TextButton(onClick = { timezoneDialog = false }, modifier = Modifier.align(Alignment.End)) {
+                        Text("Done", color = accent.primary, fontWeight = FontWeight.SemiBold)
+                    }
                 }
-            },
-            confirmButton = { TextButton(onClick = { timezoneDialog = false }) { Text("Done") } }
-        )
+            }
+        }
         Spacer(Modifier.height(24.dp)); Text("DOCUMENTATION", color = accent.primary, fontSize = 12.sp, fontWeight = FontWeight.Bold)
         Surface(Modifier.fillMaxWidth().padding(top = 8.dp).clickable { onDocs() }, color = Panel, shape = RoundedCornerShape(14.dp)) {
             Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) { Text("API Documentation", color = MainText, modifier = Modifier.weight(1f), fontWeight = FontWeight.Medium); Text("Open ↗", color = accent.primary, fontSize = 13.sp) }
