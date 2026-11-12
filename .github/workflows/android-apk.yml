@@ -1,4 +1,5 @@
 name: Build ShabGPT Android APK
+# Rebuild after native UI and timezone picker updates.
 on:
   workflow_dispatch:
   push:
