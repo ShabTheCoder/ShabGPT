@@ -37,6 +37,7 @@ import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
@@ -384,7 +385,7 @@ private fun ChatScreen(accent: AccentTheme, username: String, messages: List<Cha
     Column(Modifier.fillMaxSize().background(Ink)) {
         // Compact app bar with a quiet divider instead of a heavy boxed header.
         Row(
-            Modifier.fillMaxWidth().background(Panel).padding(horizontal = 12.dp, vertical = 9.dp),
+            Modifier.fillMaxWidth().background(Ink).padding(horizontal = 12.dp, vertical = 9.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onHistory, modifier = Modifier.size(42.dp)) {
@@ -394,7 +395,7 @@ private fun ChatScreen(accent: AccentTheme, username: String, messages: List<Cha
             Spacer(Modifier.width(11.dp))
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.Center) {
                 Text("ShabGPT", color = MainText, fontWeight = FontWeight.SemiBold, fontSize = 18.sp, letterSpacing = (-0.3).sp)
-                Text(username, color = Muted, fontSize = 12.sp)
+                Text("PERSONAL AI ASSISTANT", color = Muted, fontSize = 9.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.1.sp)
             }
             IconButton(onClick = onNewChat, modifier = Modifier.size(42.dp)) {
                 Icon(Icons.Default.Add, "New chat", tint = MainText, modifier = Modifier.size(25.dp))
@@ -452,13 +453,14 @@ private fun ChatScreen(accent: AccentTheme, username: String, messages: List<Cha
                         }
                         Spacer(Modifier.height(7.dp))
                         Surface(
-                            color = if (isUser) Panel2 else Panel,
+                            color = if (isUser) Panel2 else Ink,
+                            border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = if (isUser) 0.035f else 0.075f)),
                             shape = RoundedCornerShape(
                                 topStart = 20.dp, topEnd = 20.dp,
                                 bottomStart = if (isUser) 20.dp else 7.dp,
                                 bottomEnd = if (isUser) 7.dp else 20.dp
                             ),
-                            modifier = Modifier.fillMaxWidth(if (isUser) 0.91f else 1f)
+                            modifier = Modifier.fillMaxWidth(if (isUser) 0.84f else 1f)
                         ) {
                             Column(Modifier.padding(horizontal = 16.dp, vertical = 15.dp)) {
                                 if (msg.images.isNotEmpty()) {
@@ -556,7 +558,10 @@ private fun ChatScreen(accent: AccentTheme, username: String, messages: List<Cha
                 }
             }
         }
-        Column(Modifier.fillMaxWidth().background(Panel).padding(start = 11.dp, end = 11.dp, top = 10.dp, bottom = 7.dp)) {
+        Column(Modifier.fillMaxWidth().background(Ink).padding(horizontal = 12.dp, vertical = 8.dp)) {
+            Surface(color = Panel, shape = RoundedCornerShape(25.dp),
+                border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.08f)),
+                modifier = Modifier.fillMaxWidth()) {
             Row(verticalAlignment = Alignment.Bottom) {
                 IconButton(
                     onClick = onAttach,
@@ -601,6 +606,7 @@ private fun ChatScreen(accent: AccentTheme, username: String, messages: List<Cha
                 ) {
                     Icon(Icons.Default.Send, "Send message", modifier = Modifier.size(20.dp))
                 }
+            }
             }
             Spacer(Modifier.height(8.dp))
             Text(
@@ -654,7 +660,12 @@ private fun HistoryScreen(accent: AccentTheme, conversations: List<Conversation>
 private fun SettingsScreen(accent: AccentTheme, username: String, selectedTheme: String, selectedTimezone: String, onTheme: (String) -> Unit,
     onTimezone: (String) -> Unit, onBack: () -> Unit, onDocs: () -> Unit, onLogout: () -> Unit) {
     var timezoneDialog by remember { mutableStateOf(false) }
+    var timezoneQuery by remember { mutableStateOf("") }
     val timezoneOptions = remember { java.util.TimeZone.getAvailableIDs().distinct().sorted() }
+    val filteredTimezones = remember(timezoneOptions, timezoneQuery) {
+        if (timezoneQuery.isBlank()) timezoneOptions
+        else timezoneOptions.filter { it.contains(timezoneQuery.trim(), ignoreCase = true) }
+    }
     Column(Modifier.fillMaxSize().background(Ink).padding(20.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) { IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, "Back", tint = MainText) }; Text("Settings", color = MainText, fontSize = 22.sp, fontWeight = FontWeight.Bold) }
         Spacer(Modifier.height(24.dp)); Text("ACCOUNT", color = accent.primary, fontSize = 12.sp, fontWeight = FontWeight.Bold); Spacer(Modifier.height(8.dp))
@@ -672,7 +683,7 @@ private fun SettingsScreen(accent: AccentTheme, username: String, selectedTheme:
         }
         Spacer(Modifier.height(24.dp)); Text("REGIONAL PREFERENCES", color = accent.primary, fontSize = 12.sp, fontWeight = FontWeight.Bold)
         Text("Choose the timezone ShabGPT should use when answering questions about local time.", color = Muted, fontSize = 12.sp, modifier = Modifier.padding(top = 5.dp, bottom = 10.dp))
-        Surface(Modifier.fillMaxWidth().clickable { timezoneDialog = true }, color = Panel, shape = RoundedCornerShape(14.dp)) {
+        Surface(Modifier.fillMaxWidth().clickable { timezoneQuery = ""; timezoneDialog = true }, color = Panel, shape = RoundedCornerShape(14.dp)) {
             Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) { Text("Time zone", color = MainText, fontWeight = FontWeight.Medium); Text(selectedTimezone, color = Muted, fontSize = 12.sp) }
                 Text("Change", color = accent.primary, fontSize = 13.sp)
@@ -681,11 +692,45 @@ private fun SettingsScreen(accent: AccentTheme, username: String, selectedTheme:
         if (timezoneDialog) AlertDialog(
             onDismissRequest = { timezoneDialog = false },
             title = { Text("Choose time zone") },
-            text = { LazyColumn(Modifier.heightIn(max = 420.dp)) { items(timezoneOptions) { zone ->
-                Text(zone, color = if (zone == selectedTimezone) accent.primary else MainText,
-                    modifier = Modifier.fillMaxWidth().clickable { onTimezone(zone); timezoneDialog = false }.padding(vertical = 11.dp),
-                    fontWeight = if (zone == selectedTimezone) FontWeight.Bold else FontWeight.Normal)
-            } } },
+            text = {
+                Column {
+                    OutlinedTextField(
+                        value = timezoneQuery,
+                        onValueChange = { timezoneQuery = it },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        placeholder = { Text("Search time zones") },
+                        leadingIcon = { Icon(Icons.Default.Search, null, tint = Muted) },
+                        trailingIcon = {
+                            if (timezoneQuery.isNotEmpty()) {
+                                IconButton(onClick = { timezoneQuery = "" }) {
+                                    Icon(Icons.Default.Close, "Clear search", tint = Muted)
+                                }
+                            }
+                        },
+                        shape = RoundedCornerShape(14.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = MainText,
+                            unfocusedTextColor = MainText,
+                            focusedBorderColor = accent.primary,
+                            unfocusedBorderColor = Color(0xFF494451),
+                            cursorColor = accent.primary
+                        )
+                    )
+                    Spacer(Modifier.height(10.dp))
+                    if (filteredTimezones.isEmpty()) {
+                        Text("No matching time zones", color = Muted, modifier = Modifier.padding(12.dp))
+                    } else {
+                        LazyColumn(Modifier.heightIn(max = 340.dp)) {
+                            items(filteredTimezones) { zone ->
+                                Text(zone, color = if (zone == selectedTimezone) accent.primary else MainText,
+                                    modifier = Modifier.fillMaxWidth().clickable { onTimezone(zone); timezoneDialog = false }.padding(vertical = 12.dp, horizontal = 4.dp),
+                                    fontWeight = if (zone == selectedTimezone) FontWeight.Bold else FontWeight.Normal)
+                            }
+                        }
+                    }
+                }
+            },
             confirmButton = { TextButton(onClick = { timezoneDialog = false }) { Text("Done") } }
         )
         Spacer(Modifier.height(24.dp)); Text("DOCUMENTATION", color = accent.primary, fontSize = 12.sp, fontWeight = FontWeight.Bold)
